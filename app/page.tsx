@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Message } from '@/types';
-import { sendQuery, healthCheck } from '@/lib/api';
+import { sendQuery } from '@/lib/api';
 import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
 
@@ -16,7 +16,6 @@ const exampleQueries = [
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'offline'>('checking');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -26,12 +25,6 @@ export default function Home() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  useEffect(() => {
-    healthCheck()
-      .then(() => setApiStatus('online'))
-      .catch(() => setApiStatus('offline'));
-  }, []);
 
   const handleQuery = async (query: string) => {
     const userMessage: Message = {
@@ -73,18 +66,6 @@ export default function Home() {
             <h1 className="text-xl font-semibold text-white">SciSciNet Agent</h1>
             <p className="text-xs text-gray-400">AI-powered research data analysis</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`h-2 w-2 rounded-full ${
-              apiStatus === 'online' ? 'bg-green-500' : 
-              apiStatus === 'offline' ? 'bg-red-500' : 
-              'bg-yellow-500'
-            }`} />
-            <span className="text-xs text-gray-400">
-              {apiStatus === 'online' ? 'Connected' : 
-               apiStatus === 'offline' ? 'Offline' : 
-               'Connecting...'}
-            </span>
-          </div>
         </div>
       </header>
 
@@ -102,23 +83,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-gray-300">Try asking:</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {exampleQueries.map((example, index) => (
-                    <button
-                      key={index}
-                      onClick={() => !loading && handleQuery(example)}
-                      disabled={loading}
-                      className="rounded-full border border-gray-700 bg-gray-800 px-4 py-2 text-sm text-gray-300 transition-all hover:border-gray-600 hover:bg-gray-750 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {example}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-4">
+              <div className="pt-8">
                 <ChatInput onSubmit={handleQuery} loading={loading} />
               </div>
             </div>
